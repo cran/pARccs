@@ -1,4 +1,4 @@
-Boot_CI <- function(D,E,C=NULL, model, stepwise=FALSE, scope=NULL, nboot=250, alpha=0.025, original, type=c("perc","bca","both"), strat_boot=TRUE){
+Boot_CI <- function(D,E,C=NULL, model, stepwise=FALSE, scope=NULL, nboot=1000, alpha=0.025, original, type=c("perc","bca","both"), strat_boot=TRUE){
 
 ################## plausibility check of the entered data ######################
 
