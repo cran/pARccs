@@ -1,2 +1,2 @@
-UseDynLib(PARccs)
+UseDynLib(pARccs)
 export(AR_woC,AR_wC, AdjAR, PAR,Boot_CI)

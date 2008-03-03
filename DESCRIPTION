@@ -1,4 +1,4 @@
-Package: PARccs
+Package: pARccs
 Type: Package
 Title: Estimation of partial attributable risks (PAR) from case-control data
 Version: 0.1-1
@@ -8,5 +8,5 @@ Maintainer: Christiane Raemsch <christiane_raemsch@yahoo.de>
 Depends: R (>= 2.4.1), e1071, cba
 Description: Functions to estimate partial attributable risks from case-control data with
  corresponding percentile or BCa confidence intervals
-License: GPL (Version 2 or later)
-Packaged: Fri Jun 13 13:43:19 2008; raemschc
+License: GPL (>= 2)
+Packaged: Wed Oct 15 12:06:37 2008; raemschc
