@@ -1,5 +1,6 @@
 \name{PAR}
 \alias{PAR}
+\alias{getPAR}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Estimating partial attributable risks from case-control data }
 
@@ -49,8 +50,9 @@ PAR(D, E, C = NULL, model)
 }
 \value{
 
-  \code{PAR} returns a named matrix which contains the partial attributable risk for 
-  every given exposure factor.
+  \code{PAR} returns a object of class "PAR". The partial attributable risk for 
+  each exposure factor is given. To get the PAR/s for further calculations use function \code{getPAR}.
+  
   
 }
 \references{ Eide, G.; Gefeller, O. (1995)
@@ -84,6 +86,7 @@ exposure2        <- sample(dicho, 100, replace=TRUE, prob=c(0.4, 0.6))
 relation         <- as.formula(cc_state~exposure1+exposure2)
 data_exp         <- cbind(exposure1, exposure2)
 PAR_exposures    <- PAR(D=cc_state, E=data_exp, model=relation)
+PAR_exposures
 
 #### partial attributable risks of exposure1 and     #####
 #### exposure2 with taking into account confounder1  #####
@@ -91,8 +94,8 @@ PAR_exposures    <- PAR(D=cc_state, E=data_exp, model=relation)
 set.seed(2008)
 dicho            <- c(0,1)
 cc_state         <- sample(dicho, 100, replace=TRUE)
-exposure1        <- sample(dicho, 100, replace=TRUE, prob=c(0.7, 0.3))
-exposure2        <- sample(dicho, 100, replace=TRUE, prob=c(0.4, 0.6))
+exposure1        <- sample(dicho, 100, replace=TRUE, prob=c(0.9, 0.1))
+exposure2        <- sample(dicho, 100, replace=TRUE, prob=c(0.6, 0.4))
 cat_confounder   <- c(0,1,2,3)
 confounder1      <- sample(cat_confounder, 100, replace=TRUE)
 data_exp         <- cbind(exposure1, exposure2)
@@ -101,6 +104,7 @@ colnames(conf)   <- c("confounder1")
 rel_mod          <- glm(cc_state~exposure1+exposure2+confounder1,
                         family=binomial)
 PAR_exposures    <- PAR(cc_state, data_exp, conf, rel_mod)
+PAR_exposures
 
 }
 

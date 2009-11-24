@@ -1,2 +1,5 @@
 UseDynLib(pARccs)
-export(AR_woC,AR_wC, AdjAR, PAR,Boot_CI)
+export(AR_woC,AR_wC, AdjAR, PAR,Boot_CI, AR_Plot)
+exportClasses("AR", "PAR", "Boot")
+exportMethods("show", "print", "getAR", "getOR", "getCProb", "getCombi", "getPAR", "getCIperc", "getCIbca")
+

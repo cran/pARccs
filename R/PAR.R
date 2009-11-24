@@ -1,6 +1,15 @@
 PAR <- function(D,E,C=NULL, model){
-                
-AtR               <- AdjAR(D,E,C,model)[,ncol(E)+1] 
+
+#source('Class_AR.r')
+               
+AtR1              <- AdjAR(D,E,C,model)
+if(class(AtR1)=="matrix"){
+	 AtR <- AtR1[,ncol(E)+1] 
+}
+if(class(AtR1)=="AR"){
+   AtR               <- getAR(AtR1)[,ncol(E)+1] 
+}
+
 bincomE           <- bincombinations(ncol(E))   
 colnames(bincomE) <- colnames(E)
 
@@ -29,7 +38,9 @@ for(i in 1:(ncol(E))){
 }
 
 PAR           <- matrix(PAR, ncol=1)
-rownames(PAR) <- colnames(E)
-return(PAR)
 
+rownames(PAR) <- colnames(E)
+
+PAR2 <- new("PAR", PAR=PAR)
+return(PAR2)
 }

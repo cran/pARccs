@@ -9,8 +9,8 @@ pos_dum[1] <- 1
 
 if(ncol(C)==1){
 conf_nam   <- colnames(C)
-C          <- as.vector(C)
-C          <- as.factor(C)
+# C          <- as.vector(C)
+C          <- as.factor(C[,1])
 pos_dum[2] <- length(levels(C))+1
 } else{
        C <- as.data.frame(C)
@@ -25,8 +25,8 @@ colnames(EC) <- gn
 
 ########################### logistic regression ################################
 
-sample_DEC          <- as.data.frame(cbind(D,EC))
-model.out           <- glm(formula(model), family=binomial, data=sample_DEC) 
+sample_DEC          <- data.frame(D, EC)
+model.out           <- glm(formula(model), family=binomial, data=sample_DEC)
 coeff               <- coef(model.out)
 coeff[is.na(coeff)] <- 0
 new_formula         <- as.formula(paste("~",paste(names(coeff)[-1],collapse="+")))
@@ -40,9 +40,10 @@ C_dummy   <- C_dummy[,-pos_dum_v]
 
 conf_names <- c()
 if(ncol(as.matrix(C))==1){
-   for(k in 1:ncol(C_dummy)){
+   for(k in 1:ncol(as.matrix(C_dummy))){
        conf_names[k] <- names(coeff)[ncol(E)+1+k]
    }
+   C_dummy <- as.matrix(C_dummy)
    colnames(C_dummy) <- conf_names  
 }
  
@@ -64,14 +65,15 @@ for(j in 2:length(pos_dum)){
 bincomC <- na.omit(bincomC)
 
 strat_AR <- c() 
-    
+ 
 ############## running through the strata of the dummy confounder ##############
 
+
 for(s in 1:nrow(bincomC)){        
-    he               <- matrix(rep(bincomC[s,],nrow(bincomE)),nrow=nrow(bincomE), byrow=TRUE)
+		he               <- matrix(rep(bincomC[s,],nrow(bincomE)),nrow=nrow(bincomE), byrow=TRUE)
     colnames(he)     <- colnames(C_dummy)
     vm               <- cbind(bincomE, he) 
-    dum_conf         <- c(conf,(ncol(E)+1):(ncol(vm)))                                        
+    dum_conf         <- c(conf,(ncol(E)+1):(ncol(vm)))                                      
     names(dum_conf)  <- colnames(vm)[dum_conf]
     
     ####################### model matrix ############################
@@ -100,27 +102,43 @@ for(s in 1:nrow(bincomC)){
               
     OR        <- c()    
     sum_terms <- c()   
-    pebd      <- c()    
+    pebd      <- c()
+		penod     <- c()    
     p         <- c()
     
     for(l in 1:nrow(vm)){
-        if(sum(D)==0) {pebd[l] <- 0} else {
-           a <- t(matrix(vm[l,],ncol=ifelse((is.vector(EC_dummy[D==1,])),1, nrow(EC_dummy[D==1,])), nrow=ncol(vm)))
-           q <- abs((EC_dummy[D==1,]) - as.numeric(a))
-           if(is.vector(q)){rq <- sum(q)} else {
+        if(sum(D[,1])==0) {pebd[l] <- 0} else {
+           a  <- t(matrix(vm[l,],ncol=ifelse((is.vector(EC_dummy[D[,1]==1,])),1, nrow(EC_dummy[D[,1]==1,])), nrow=ncol(vm)))
+           q  <- abs((EC_dummy[D[,1]==1,]) - as.numeric(a))
+           a2 <- t(matrix(vm[l,],ncol=ifelse((is.vector(EC_dummy[D[,1]==0,])),1, nrow(EC_dummy[D[,1]==0,])), nrow=ncol(vm)))
+           q2 <- abs(EC_dummy[D[,1]==0,] - as.numeric(a2))
+           if(is.vector(q)){
+                 rq  <- sum(q)
+                 rq2 <- sum(q2)
+           }else {
               rq   <- rowSums(q)
+              rq2  <- rowSums(q2)
            }
-           pebd[l] <- (sum(ifelse(rq==0,1,0)))/(nrow(sample_DEC[D==1,]))
+           pebd[l]  <- (sum(ifelse(rq==0,1,0)))/(nrow(sample_DEC[sample_DEC[,1]==1,]))
+           penod[l] <- (sum(ifelse(rq2==0,1,0)))/(nrow(sample_DEC[sample_DEC[,1]==0,]))
         }                        
     }
+    
+    if(s==1){
+    		penod_null <- penod
+    }
+    
        ln_OR          <- M%*%coeff
        OR             <- exp(ln_OR)
+       if(s == 1){
+       		OR_null <- OR
+       }
        sum_terms      <- pebd/OR     
        strat_AR[s]    <- sum(sum_terms) 
 }
 
 AtR_mc <- 1-sum(strat_AR) 
-return(AtR_mc)
+return(list(Attributable_Risk_with_Confounding = AtR_mc))
 }
 
 

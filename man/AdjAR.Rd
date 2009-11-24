@@ -1,5 +1,9 @@
 \name{AdjAR}
 \alias{AdjAR}
+\alias{getAR}
+\alias{getOR}
+\alias{getCombi}
+\alias{getCProb}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Calling the estimation of the (adjusted) attributable risks from case-control data}
 \description{
@@ -27,7 +31,10 @@ AdjAR(D, E, C = NULL, model)
 }
 
 \note{
-   Also if there are only a single exposure factor/confounder you have to enter a matrix, so
+   
+	 \code{AdjAR} handles with missing data. Cases with missing values are removed and a warning message is printed with the information how many cases were removed.
+	 
+	 Also if there are only a single exposure factor/confounder you have to enter a matrix, so
    this will be a matrix with only one column.
    
    It is also important that the given variables in \code{D}, \code{E} and \code{C} are not defined
@@ -43,7 +50,7 @@ AdjAR(D, E, C = NULL, model)
 }
 
 \value{
-   \code{AdjAR} returns a matrix containing the attributable risk for every possible (binary) 
+   \code{AdjAR} returns a object of class "AR" containing the attributable risk for every possible (binary) 
    combination of the exposure factors in \code{E}.
    
    If  \code{C=NULL} these are only adjusted to the rest of the exposure factors 
@@ -83,6 +90,7 @@ exposure2    <- sample(dicho, 100, replace=TRUE, prob=c(0.4, 0.6))
 relation     <- as.formula(cc_state~exposure1+exposure2)
 data_exp     <- cbind(exposure1, exposure2)
 AR_exposures <- AdjAR(D=cc_state, E=data_exp, model=relation)
+AR_exposures
 
 
 ##### Computation of the AR for every combination of two #####
@@ -90,8 +98,8 @@ AR_exposures <- AdjAR(D=cc_state, E=data_exp, model=relation)
 
 set.seed(2008)
 cc_state        <- sample(dicho, 100, replace=TRUE)
-exposure1       <- sample(dicho, 100, replace=TRUE, prob=c(0.7, 0.3))
-exposure2       <- sample(dicho, 100, replace=TRUE, prob=c(0.4, 0.6))
+exposure1       <- sample(dicho, 100, replace=TRUE, prob=c(0.9, 0.1))
+exposure2       <- sample(dicho, 100, replace=TRUE, prob=c(0.6, 0.4))
 cat_confounder  <- c(0,1,2,3)
 confounder1     <- sample(cat_confounder, 100, replace=TRUE)
 data_exp        <- cbind(exposure1, exposure2)
@@ -100,6 +108,7 @@ colnames(conf)  <- c("confounder1")
 rel_mod         <- glm(cc_state~exposure1+exposure2+confounder1,
                        family=binomial)
 AR_exposures    <- AdjAR(cc_state, data_exp, conf, rel_mod)
+AR_exposures
 
 
 

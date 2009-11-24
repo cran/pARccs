@@ -1,17 +1,19 @@
 \name{Boot_CI}
 \alias{Boot_CI}
+\alias{getCIperc}
+\alias{getCIbca}
 
-\title{ Bootstrap confidence intervals for partial attributable risks (PAR) from case-control data }
+\title{ Bootstrap confidence intervals for (partial) attributable risks (AR and PAR) from case-control data }
 \description{
-  With \code{Boot_CI} you can determine confidence intervals for partial atributable 
+  With \code{Boot_CI} you can determine confidence intervals for (partial) atributable 
   risks from case-control data.
   Therefor the nonparametric bootstrap is used with whose bootstrap replications eighter 
   percentile confidence intervals or BCa confidence intervals are developed (or both, if you want to).
 }
 \usage{
-Boot_CI(D, E, C = NULL, model, stepwise = FALSE, scope = NULL, 
-        nboot = 1000, alpha = 0.025, original, 
-        type = c("perc", "bca", "both"), strat_boot = TRUE)
+Boot_CI(D, E, C = NULL, model, method=c("PAR", "AR"), stepwise = FALSE, 
+        scope = NULL, nboot = 1000, alpha = 0.025, original, 
+        type = "perc", strat_boot = TRUE)
 }
 
 \arguments{
@@ -19,6 +21,7 @@ Boot_CI(D, E, C = NULL, model, stepwise = FALSE, scope = NULL,
   \item{E}{ a matrix of the exposure factor/s (all of them have to be dichotomous!)}
   \item{C}{ a matrix of the confounder/s (all of them have to be categorical!)}
   \item{model}{ a model formula or an object of class "\code{glm}" }
+  \item{method}{ defines, if confidence intervals for attributable risks (AR) or partial attributable risks (PAR) should be estimated}
   \item{stepwise}{ a logical value indicating whether a stepwise-selected model should 
                    be used in the computation, default is \code{FALSE} }
   \item{scope}{ a description of the variables which should be taken into account in the 
@@ -38,8 +41,8 @@ Boot_CI(D, E, C = NULL, model, stepwise = FALSE, scope = NULL,
 }
 \details{
 
-The computation of the partial attributable risks from the data set does not take place in this function.
-You have to estimate them separately and pass the results through \code{original} to the function 
+The computation of the (partial) attributable risks from the data set does not take place in this function.
+You have to estimate them separately and pass the results (from classes "AR"/"PAR") through \code{original} to the function 
 \code{Boot_CI}. 
 
 To generate the bootstrap sample in every replication step one may use eighter the stratified or the non-
@@ -75,13 +78,14 @@ you should take note of the great computational effort by using the BCa method.
   as factors.
   
   Validity of the interval estimation can only be taken for granted for data with simple random sampling, stratified
-   random sampling or frequency-matching of controls.    
+   random sampling or frequency-matching of controls.
+	 
+	 Please note, if nboot is too small, BCa interval estimation may fail (for lower, upper or both limits). In this case, the limit is given with "NA".   
 }
 
 
 \value{
-  \code{Boot_CI} returns a named matrix with two columns: the first contains the lower endpoint, 
-  the second the upper endpoint. 
+  \code{Boot_CI} returns a object of class "Boot". To extract the percentile confidence interval use function \code{getCIperc}, for the BCa confidence interval use \code{getCIbca}. 
 }
 \references{ Efron, B.; Tibshirani, R. (1986)
               Bootstrap methods for standard errors, confidence intervals, and other measure 
@@ -109,11 +113,12 @@ exposure2       <- sample(dicho, 100, replace=TRUE, prob=c(0.4, 0.6))
 relation        <- as.formula(cc_state~exposure1+exposure2)
 data_exp        <- cbind(exposure1, exposure2)
 PAR_exposures   <- PAR(cc_state, data_exp, model=relation)
-CI_95           <- Boot_CI(D=cc_state, E=data_exp, model=relation, 
+CI_95           <- Boot_CI(D=cc_state, E=data_exp, model=relation, method="PAR", 
                            nboot=70,original=PAR_exposures, type="bca")
+CI_95
 
 ###### Computation of percentile confidence intervals #######
-###### for the PAR if there are confounders           #######
+###### for the AR if there are confounders            #######
 
 set.seed(2008)
 dicho           <- c(0,1)
@@ -126,9 +131,10 @@ relation        <- as.formula(cc_state~exposure1+exposure2+confounder1)
 data_exp        <- cbind(exposure1, exposure2)
 conf            <- matrix(confounder1, ncol=1)
 colnames(conf)  <- c("confounder1")
-PAR_exposures   <- PAR(cc_state, data_exp, conf, model=relation)
+AR_exposures    <- AdjAR(cc_state, data_exp, conf, model=relation)
 CI_95           <- Boot_CI(D=cc_state, E=data_exp, C=conf, model=relation, 
-                           nboot=70,original=PAR_exposures)
+                           method="AR", nboot=70,original=AR_exposures)
+CI_95
 
 }
 \keyword{ manip }

@@ -18,7 +18,7 @@ AR_wC (D, E, C = NULL, model, bincomE, conf = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{D}{a vector which holds the case-control state ("1" = case, "0"=control) }
+  \item{D}{a matrix which holds the case-control state ("1" = case, "0"=control) }
   \item{E}{a matrix of the exposure factor/s (all of them have to be dichotomous!) }
   \item{C}{a matrix of the confounder/s (all of them have to be categorical!)}
   \item{model}{ a model formula or an object of class "\code{glm}"}
@@ -70,8 +70,8 @@ AR_wC (D, E, C = NULL, model, bincomE, conf = NULL)
  }
  
 \value{
-   \code{AR_woC} returns a single value which is the (joint) attributable risk of one (or more) exposure 
-   factor(s) adjusted to the rest of the exposure factors.
+   \code{AR_woC} returns a list which contains the (joint) attributable risk of one (or more) exposure 
+   factor(s) adjusted to the rest of the exposure factors, the odds ratio and the conditional probability for every combination of the exposures in \code{E} (last ones are needed if plotting the attributable risks) .
 
    \code{AR_wC} returns a single value which is the (joint) attributable risk of one (or more) exposure 
    factor(s) adjusted to the rest of the exposure factors and to the given confounders.
@@ -102,7 +102,7 @@ AR_wC (D, E, C = NULL, model, bincomE, conf = NULL)
 
 set.seed(2007)
 dicho            <- c(0,1)
-cc_state         <- sample(dicho, 100, replace=TRUE)
+cc_state         <- as.matrix(sample(dicho, 100, replace=TRUE))
 exposure1        <- sample(dicho, 100, replace=TRUE, prob=c(0.7, 0.3))
 exposure2        <- sample(dicho, 100, replace=TRUE, prob=c(0.4, 0.6))
 relation         <- as.formula(cc_state~exposure1+exposure2)
@@ -110,6 +110,7 @@ data_exp         <- cbind(exposure1, exposure2)
 bincom           <- bincombinations(2)
 colnames(bincom) <- colnames(data_exp)
 AR_exposure2     <- AR_woC(cc_state, data_exp, relation, bincom, c(2))
+AR_exposure2
 
 
 ##### use of function 'AR_wC':               #####
@@ -118,7 +119,7 @@ AR_exposure2     <- AR_woC(cc_state, data_exp, relation, bincom, c(2))
 
 set.seed(2008)
 dicho            <- c(0,1)
-cc_state         <- sample(dicho, 100, replace=TRUE)
+cc_state         <- as.matrix(sample(dicho, 100, replace=TRUE))
 exposure1        <- sample(dicho, 100, replace=TRUE, prob=c(0.7, 0.3))
 exposure2        <- sample(dicho, 100, replace=TRUE, prob=c(0.4, 0.6))
 cat_confounder   <- c(0,1,2,3)
@@ -131,6 +132,7 @@ colnames(conf)   <- c("confounder1")
 bincom           <- bincombinations(2)
 colnames(bincom) <- colnames(data_exp)
 AR_exposure1_2   <- AR_wC(cc_state, data_exp, conf, rel_mod, bincom)
+AR_exposure1_2 
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
